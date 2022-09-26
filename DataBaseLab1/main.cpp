@@ -47,6 +47,20 @@ bool checkIndex(int index) {
 	return true;
 }
 
+void changeDepartmentFileds(Department& department, bool updateMode = false) {
+	Department prev = department;
+	std::cout << "Name: ";
+	std::cin >> department.name;
+	if (updateMode && strcmp(department.name, "-") == 0) {
+		strcpy_s(department.name, prev.name);
+	}
+
+	std::cout << "Website: ";
+	std::cin >> department.website;
+	if (updateMode && strcmp(department.website, "-") == 0) {
+		strcpy_s(department.website, prev.website);
+	}
+}
 
 Department createDepartment() {
 
@@ -56,15 +70,12 @@ Department createDepartment() {
 		std::cin >> department.index;
 	} while (checkIndex(department.index));
 
-	std::cout << "Name: ";
-	std::cin >> department.name;
-
-
-	std::cout << "Website: ";
-	std::cin >> department.website;
+	changeDepartmentFileds(department);
 
 	return department;
 }
+
+
 
 int getUnusedIndex() {
 	FILE* fp;
@@ -270,6 +281,7 @@ Department getDepartment(int key) {
 
 void printDepartment() {
 	int key;
+	std::cout << "Key: ";
 	std::cin >> key;
 	Department department = getDepartment(key);
 	if (department.index != -1) {
@@ -278,6 +290,20 @@ void printDepartment() {
 	else {
 		std::cout << "Can't find this department." << std::endl;
 	}
+}
+
+void updateDepartment(int key) {
+	Department updated = getDepartment(key);
+	std::cout << "Type updated info:\n";
+	changeDepartmentFileds(updated, true);
+	DepartmentIndex index = getDepartmentIndex(key);
+	updateDepartmentFile(index.address, updated);
+}
+void updateDepartmentByKey() {
+	int key;
+	std::cout << "Key: ";
+	std::cin >> key;
+	updateDepartment(key);
 }
 
 
@@ -392,13 +418,7 @@ int menu() {
 		else if (strcmp(command, "insert_s") == 0) {
 
 		}
-		else if (strcmp(command, "get_m") == 0) {
-
-		}
-		else if (strcmp(command, "get_s") == 0) {
-
-		}
-		else if (strcmp(command, "del_m") == 0) {
+		else if (strcmp(command, "del_m") == 0 || strcmp(command, "dm") == 0) {
 			deleteDepartmentByKey();
 		}
 		else if (strcmp(command, "del_s") == 0) {
@@ -413,8 +433,8 @@ int menu() {
 		else if (strcmp(command, "print_s") == 0) {
 
 		}
-		else if (strcmp(command, "update_m") == 0) {
-
+		else if (strcmp(command, "update_m") == 0 || strcmp(command, "um") == 0) {
+			updateDepartmentByKey();
 		}
 		else if (strcmp(command, "update_s") == 0) {
 
