@@ -137,6 +137,7 @@
   <ItemGroup>
     <None Include="department.fl" />
     <None Include="department.index" />
+    <None Include="garbage.fl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

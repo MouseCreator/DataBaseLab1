@@ -7,9 +7,14 @@
 #define WEBSITE_LENGTH 50
 
 struct Department {
-	int firstTeacherNumber;
+	int firstTeacherNumber = -1;
 	bool isDeleted = false;
-	unsigned short index;
-	char name[NAME_LENGTH];
-	char website[WEBSITE_LENGTH];
+	unsigned short index = -1;
+	char name[NAME_LENGTH] = "_NN";
+	char website[WEBSITE_LENGTH] = "_NW";
+
+	void print() {
+		std::cout << "DEPARTMENT:\n" << "\tDeleted:" << isDeleted << "\n\tIndex: " << index <<
+			"\n\tName: " << name << "\n\tWebsite: " << website << "\n\tTeacher: " << firstTeacherNumber << std::endl;
+	}
 };

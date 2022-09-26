@@ -37,5 +37,8 @@
     <None Include="department.fl">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="garbage.fl">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
