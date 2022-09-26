@@ -1,18 +1,11 @@
-#include <iostream>
 
-#include "Department.h"
-#include "DepartmentIndex.h"
-#include "GarbageList.h"
+#include "fuctions.h"
 
 const char* GARBAGE_FILE = "garbage.fl";
 const char* DEPARTMENT_INDEX_FILE = "department.index";
 const char* DEPARTMENT_FL_FILE = "department.fl";
 
-int addToFl(Department department);
-int getNumberOfDepartmentIndex(FILE* fp);
-void addToIndex(DepartmentIndex* index);
-void updateDepartmentFile(int address, Department department);
-int menu();
+
 
 DepartmentIndex* createDepartmentIndex(int key, int address) {
 	DepartmentIndex* index = new DepartmentIndex();
@@ -47,17 +40,17 @@ bool checkIndex(int index) {
 	return true;
 }
 
-void changeDepartmentFileds(Department& department, bool updateMode = false) {
+void changeDepartmentFileds(Department& department, bool updateMode) {
 	Department prev = department;
 	std::cout << "Name: ";
 	std::cin >> department.name;
-	if (updateMode && strcmp(department.name, "-") == 0) {
+	if (updateMode && strcmp(department.name, "") == 0) {
 		strcpy_s(department.name, prev.name);
 	}
 
 	std::cout << "Website: ";
 	std::cin >> department.website;
-	if (updateMode && strcmp(department.website, "-") == 0) {
+	if (updateMode && strcmp(department.website, "") == 0) {
 		strcpy_s(department.website, prev.website);
 	}
 }
@@ -68,16 +61,14 @@ Department createDepartment() {
 	do {
 		std::cout << "Index: ";
 		std::cin >> department.index;
-	} while (checkIndex(department.index));
+	} while (checkIndex(department.index) || department.index == -1);
 
 	changeDepartmentFileds(department);
 
 	return department;
 }
 
-
-
-int getUnusedIndex() {
+int getUnusedIndex(const char* file) {
 	FILE* fp;
 	fopen_s(&fp, GARBAGE_FILE, "rb+");
 
@@ -126,7 +117,7 @@ int getUnusedIndex() {
 
 }
 
-void addGarbage(int address) {
+void addGarbage(int address, const char* file) {
 	FILE* fp;
 	fopen_s(&fp, GARBAGE_FILE, "a+");
 	if (!fp) {
@@ -151,7 +142,7 @@ int addToFl(Department department) {
 	fopen_s(&fp, DEPARTMENT_FL_FILE, "rb+");
 	int position = -1;
 	if (fp) {
-		int offset = getUnusedIndex();
+		int offset = getUnusedIndex(GARBAGE_FILE);
 		if (offset == -1) { //no gardage
 			fseek(fp, 0, SEEK_END);
 		}
@@ -339,7 +330,7 @@ void removeFromIndex(int key) {
 void deleteDepartment(int key) {
 	DepartmentIndex index = getDepartmentIndex(key);
 	if (index.address != -1) {
-		addGarbage(index.address);
+		addGarbage(index.address, GARBAGE_FILE);
 		Department toDelete = findByAddress(index.address);
 		toDelete.isDeleted = true;
 
@@ -395,15 +386,17 @@ void printAllDepartments() {
 	}
 }
 
+void insertDepartment() {
+	Department d = createDepartment();
+	addToFiles(d);
+}
+
 int main(void) {
 	return menu();
 }
 
 
-void insertDepartment() {
-	Department d = createDepartment();
-	addToFiles(d);
-}
+
 
 int menu() {
 	char command[10];
@@ -415,8 +408,8 @@ int menu() {
 		if (strcmp(command, "insert_m") == 0 || strcmp(command, "im") == 0) {
 			insertDepartment();
 		}
-		else if (strcmp(command, "insert_s") == 0) {
-
+		else if (strcmp(command, "insert_s") == 0 || strcmp(command, "is") == 0) {
+			insertTeacher();
 		}
 		else if (strcmp(command, "del_m") == 0 || strcmp(command, "dm") == 0) {
 			deleteDepartmentByKey();
@@ -430,8 +423,14 @@ int menu() {
 		else if (strcmp(command, "print_all_m") == 0 || strcmp(command, "pma") == 0) {
 			printAllDepartments();
 		}
-		else if (strcmp(command, "print_s") == 0) {
-
+		else if (strcmp(command, "print_s") == 0 || strcmp(command, "ps") == 0) {
+			printTeacher();
+		}
+		else if (strcmp(command, "print_all_s") == 0 || strcmp(command, "psa") == 0) {
+			printAllTeachers();
+		}
+		else if (strcmp(command, "print_direct_s") == 0 || strcmp(command, "psd") == 0) {
+			directPrintTeachers();
 		}
 		else if (strcmp(command, "update_m") == 0 || strcmp(command, "um") == 0) {
 			updateDepartmentByKey();

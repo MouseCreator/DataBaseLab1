@@ -128,16 +128,21 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="teacher.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Department.h" />
     <ClInclude Include="DepartmentIndex.h" />
+    <ClInclude Include="fuctions.h" />
     <ClInclude Include="GarbageList.h" />
+    <ClInclude Include="Teacher.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="department.fl" />
     <None Include="department.index" />
     <None Include="garbage.fl" />
+    <None Include="teacher.fl" />
+    <None Include="teacher_garbage.fl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

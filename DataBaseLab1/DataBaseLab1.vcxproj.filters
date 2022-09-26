@@ -18,6 +18,9 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="teacher.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Department.h">
@@ -29,6 +32,12 @@
     <ClInclude Include="GarbageList.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="Teacher.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fuctions.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="department.index">
@@ -38,6 +47,12 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="garbage.fl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="teacher_garbage.fl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="teacher.fl">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
