@@ -11,6 +11,7 @@ const char* DEPARTMENT_FL_FILE = "department.fl";
 int addToFl(Department department);
 int getNumberOfDepartmentIndex(FILE* fp);
 void addToIndex(DepartmentIndex* index);
+void updateDepartmentFile(int address, Department department);
 int menu();
 
 DepartmentIndex* createDepartmentIndex(int key, int address) {
@@ -45,6 +46,7 @@ bool checkIndex(int index) {
 	}
 	return true;
 }
+
 
 Department createDepartment() {
 
@@ -156,7 +158,6 @@ int addToFl(Department department) {
 	return position;
 }
 
-
 int getNumberOfDepartmentIndex(FILE* fp) {
 	fseek(fp, 0, SEEK_END);
 	int len = ftell(fp);
@@ -180,23 +181,20 @@ void addToIndex(DepartmentIndex* index) {
 		bool foundPlace = false;
 
 		//read all departments and place new department in place to keep it sorted
-		for (int i = 0; i < size; i++) {
+		for (int i = 0; i < size - 1; i++) {
 			DepartmentIndex toAdd;
-			if (i < size - 1) {
-				fread(&toAdd, sizeof(toAdd), 1, fp);
-				if (!foundPlace && toAdd.key > index->key) {
-					foundPlace = true;
-					departments[i].address = index->address;
-					departments[i].key = index->key;
-					i++;
-				}
-				departments[i].address = toAdd.address;
-				departments[i].key = toAdd.key;
-			}
-			else {
+			fread(&toAdd, sizeof(toAdd), 1, fp);
+			if (!foundPlace && toAdd.key > index->key) {
+				foundPlace = true;
 				departments[i].address = index->address;
 				departments[i].key = index->key;
 			}
+			departments[i+foundPlace].address = toAdd.address;
+			departments[i+foundPlace].key = toAdd.key;
+		}
+		if (!foundPlace) {
+			departments[size-1].address = index->address;
+			departments[size-1].key = index->key;
 		}
 		fclose(fp);
 
@@ -283,6 +281,93 @@ void printDepartment() {
 }
 
 
+void removeFromIndex(int key) {
+	FILE* fp;
+	fopen_s(&fp, DEPARTMENT_INDEX_FILE, "rb+");
+	if (!fp)
+		return;
+	int size = getNumberOfDepartmentIndex(fp);
+	size--;
+	DepartmentIndex* departments = new DepartmentIndex[size];
+
+	for (int i = 0; i < size; i++) {
+		DepartmentIndex current;
+		fread(&current, sizeof(DepartmentIndex), 1, fp);
+		if (current.key == key) {
+			fread(&current, sizeof(DepartmentIndex), 1, fp);
+		}
+		departments[i] = current;
+	}
+	fclose(fp);
+
+	//rewrite the file
+	fopen_s(&fp, DEPARTMENT_INDEX_FILE, "wb");
+	if (fp) {
+		fwrite(departments, sizeof(DepartmentIndex), size, fp);
+		fclose(fp);
+	}
+	delete[] departments;
+}
+
+
+void deleteDepartment(int key) {
+	DepartmentIndex index = getDepartmentIndex(key);
+	if (index.address != -1) {
+		addGarbage(index.address);
+		Department toDelete = findByAddress(index.address);
+		toDelete.isDeleted = true;
+
+		//delete teachers [TODO]!!!
+
+		updateDepartmentFile(index.address, toDelete);
+		removeFromIndex(key);
+	}
+	else {
+		std::cout << "Can't find this key!" << std::endl;
+	}
+}
+
+void deleteDepartmentByKey() {
+	int key;
+	std::cout << "Key: ";
+	std::cin >> key;
+	deleteDepartment(key);
+}
+
+void updateDepartmentFile(int address, Department department) {
+	FILE* fp;
+	fopen_s(&fp, DEPARTMENT_FL_FILE, "rb+");
+	if (fp) {
+		fseek(fp, sizeof(Department) * address, SEEK_SET);
+		fwrite(&department, sizeof(department), 1, fp); //rewrite previous
+		fclose(fp);
+	}
+	else {
+		std::cout << "Can't open file to update!" << std::endl;
+	}
+}
+
+
+void printAllDepartments() {
+	FILE* fp;
+	fopen_s(&fp, DEPARTMENT_INDEX_FILE, "rb");
+	if (fp) {
+		DepartmentIndex index;
+		while (true) {
+			fread(&index, sizeof(index), 1, fp);
+			if (feof(fp)) {
+				break;
+			}
+			else {
+				Department d = findByAddress(index.address);
+				if (!d.isDeleted) {
+					d.print();
+				}
+			}
+		}
+		fclose(fp);
+	}
+}
 
 int main(void) {
 	return menu();
@@ -298,8 +383,7 @@ int menu() {
 	char command[10];
 	while (true) {
 		printf("Command: ");
-		fgets(command, 10, stdin);
-		command[strcspn(command, "\n")] = 0;
+		std::cin >> command;
 
 
 		if (strcmp(command, "insert_m") == 0 || strcmp(command, "im") == 0) {
@@ -315,13 +399,16 @@ int menu() {
 
 		}
 		else if (strcmp(command, "del_m") == 0) {
-
+			deleteDepartmentByKey();
 		}
 		else if (strcmp(command, "del_s") == 0) {
 
 		}
 		else if (strcmp(command, "print_m") == 0 || strcmp(command, "pm") == 0) {
 			printDepartment();
+		}
+		else if (strcmp(command, "print_all_m") == 0 || strcmp(command, "pma") == 0) {
+			printAllDepartments();
 		}
 		else if (strcmp(command, "print_s") == 0) {
 

@@ -14,7 +14,7 @@ struct Department {
 	char website[WEBSITE_LENGTH] = "_NW";
 
 	void print() {
-		std::cout << "DEPARTMENT:\n" << "\tDeleted:" << isDeleted << "\n\tIndex: " << index <<
+		std::cout << "DEPARTMENT:" << "\n\tIndex: " << index <<
 			"\n\tName: " << name << "\n\tWebsite: " << website << "\n\tTeacher: " << firstTeacherNumber << std::endl;
 	}
 };
