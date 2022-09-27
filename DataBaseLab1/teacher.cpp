@@ -5,7 +5,7 @@ const char* TEACHER_GARBAGE_FILE = "teacher_garbage.fl";
 
 int insertToFile(Teacher teacher, int firstPosition) {
 	FILE* fp;
-	fopen_s(&fp, TEACHER_FL_FILE, "r+");
+	fopen_s(&fp, TEACHER_FL_FILE, "rb+");
 	if (!fp) {
 		std::cout << "Can't open " << TEACHER_FL_FILE << std::endl;
 		return -1;
@@ -50,7 +50,7 @@ bool hasTeacher(int key, int firstTeacherAddress) {
 	FILE* fp;
 	
 	bool result = false;
-	fopen_s(&fp, TEACHER_FL_FILE, "r");
+	fopen_s(&fp, TEACHER_FL_FILE, "rb");
 	if (!fp) {
 		std::cout << "Can't open " << TEACHER_FL_FILE << std::endl;
 		return false;
@@ -70,7 +70,7 @@ Teacher getTeacher(int key, int firstTeacherAddress) {
 	int current = firstTeacherAddress;
 	FILE* fp;
 	Teacher result;
-	fopen_s(&fp, TEACHER_FL_FILE, "r");
+	fopen_s(&fp, TEACHER_FL_FILE, "rb");
 	if (!fp) {
 		std::cout << "Can't open " << TEACHER_FL_FILE << std::endl;
 		return result;
@@ -94,6 +94,13 @@ Teacher createTeacher(int firstTeacherAddress) {
 
 	changeTeacherFields(toCreate);
 	return toCreate;
+}
+
+Department findDepartment() {
+	int departmentKey;
+	std::cout << "Department: ";
+	std::cin >> departmentKey;
+	return getDepartment(departmentKey);
 }
 
 void changeTeacherFields(Teacher& teacher, bool updateMode) {
@@ -127,10 +134,8 @@ void changeTeacherFields(Teacher& teacher, bool updateMode) {
 }
 
 void insertTeacher() {
-	int key;
-	std::cout << "Department: ";
-	std::cin >> key;
-	Department d = getDepartment(key);
+
+	Department d = findDepartment();
 	if (d.index == -1) {
 		std::cout << "Can't find this department!" << std::endl;
 		return;
@@ -139,8 +144,7 @@ void insertTeacher() {
 	int inserted = insertToFile(t, d.firstTeacherNumber);
 	if (inserted != -1) //success
 		d.firstTeacherNumber = inserted;
-	DepartmentIndex index = getDepartmentIndex(key);
-	updateDepartmentFile(index.address, d);
+	rewriteDepartment(d);
 }
 
 void printTeacher() {
@@ -158,15 +162,12 @@ void printTeacher() {
 }
 
 void printAllTeachers() {
-	int departmentKey;
-	std::cout << "Department: ";
-	std::cin >> departmentKey;
 
 	FILE* fp;
-	fopen_s(&fp, TEACHER_FL_FILE, "r");
+	fopen_s(&fp, TEACHER_FL_FILE, "rb");
 	if (!fp)
 		return;
-	Department d = getDepartment(departmentKey);
+	Department d = findDepartment();
 
 	int current = d.firstTeacherNumber;
 	if (current == -1) {
@@ -183,7 +184,7 @@ void printAllTeachers() {
 
 void directPrintTeachers() {
 	FILE* fp;
-	fopen_s(&fp, TEACHER_FL_FILE, "r");
+	fopen_s(&fp, TEACHER_FL_FILE, "rb");
 	if (!fp)
 		return;
 	Teacher toPrint;
@@ -197,23 +198,113 @@ void directPrintTeachers() {
 	fclose(fp);
 }
 
-void removeTeacher(int key, int first) {
+int removeTeacher(int key, int first) {
 	FILE* fp;
 
-	fopen_s(&fp, TEACHER_FL_FILE, "r+");
+	fopen_s(&fp, TEACHER_FL_FILE, "rb+");
 	if (!fp) {
 		std::cout << "Can't open file " << TEACHER_FL_FILE << std::endl;
-		return;
+		return first;
 	}
-	int prev = -1;
+	int result = first;
+	int prevAddress = -1;
 	Teacher current;
 	int nowReading = first;
 	while (nowReading != -1) {
 		current = readTeacher(fp, nowReading);
 		if (current.tabnumber == key) {
+			//markers
 			addGarbage(nowReading, TEACHER_GARBAGE_FILE);
+			current.isDeleted = true;
+			
+			//change pointers
+			if (prevAddress != -1) {
+				Teacher prevTeacher = readTeacher(fp, prevAddress);
+				prevTeacher.next = current.next;
+				writeTeacher(fp, prevTeacher, prevAddress);
+			}
+			else {
+				result = current.next;
+			}
+
+			//rewrite teacher
+			writeTeacher(fp, current, nowReading);
 		}
-		prev = current.tabnumber;
+		prevAddress = nowReading;
 		nowReading = current.next;
 	}
+	fclose(fp);
+	return result;
+}
+
+void removeTeacherByKey() {
+	Department d = findDepartment();
+	if (d.index == -1) {
+		std::cout << "No such department in the bese!" << std::endl;
+		return;
+	}
+	int teacherKey;
+	std::cout << "Teacher: ";
+	std::cin >> teacherKey;
+
+	d.firstTeacherNumber = removeTeacher(teacherKey, d.firstTeacherNumber);
+	rewriteDepartment(d);
+}
+
+void delAllTeachers(Department d) {
+	FILE* fp;
+
+	fopen_s(&fp, TEACHER_FL_FILE, "r+");
+
+	if (!fp) {
+		std::cout << "Unable to delete all department's teachers. Might cause memory leak!" << std::endl;
+		return;
+	}
+	int current = d.firstTeacherNumber;
+	while (current != -1) {
+		Teacher teacher;
+		fread(&teacher, sizeof(Teacher), 1, fp);
+		addGarbage(current, TEACHER_GARBAGE_FILE);
+		teacher.isDeleted = true;
+		writeTeacher(fp, teacher, current);
+		current = teacher.next;
+	}
+	fclose(fp);
+
+}
+
+
+void updateTeacherByKey() {
+	Department d = findDepartment();
+	int key;
+	std::cout << "Teacher: ";
+	std::cin >> key;
+
+	updateTeacher(key, d.firstTeacherNumber);
+}
+
+void updateTeacher(int key, int first) {
+	Teacher t = getTeacher(key, first);
+	changeTeacherFields(t, true);
+	rewriteTeacher(t, first);
+}
+
+void rewriteTeacher(Teacher t, int first) {
+	FILE* fp;
+	fopen_s(&fp, TEACHER_FL_FILE, "r+");
+	if (!fp) {
+		std::cout << "Can't update teacher!" << std::endl;
+		return;
+	}
+	int current = first;
+	while (current != -1) {
+		Teacher last;
+		int toWrite = ftell(fp) / sizeof(Teacher);
+		fread(&last, sizeof(Teacher), 1, fp);
+		if (last.tabnumber == t.tabnumber) {
+			writeTeacher(fp, t, toWrite);
+			break;
+		}
+	}
+	fclose(fp);
 }

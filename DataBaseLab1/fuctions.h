@@ -20,6 +20,7 @@ int addToFl(Department department);
 int getNumberOfDepartmentIndex(FILE* fp);
 void addToIndex(DepartmentIndex* index);
 int binarySearch(DepartmentIndex* arr, int left, int right, int key);
+Department findDepartment();
 DepartmentIndex getDepartmentIndex(int key);
 Department findByAddress(int address);
 Department getDepartment(int key);
@@ -31,6 +32,7 @@ void deleteDepartmentByKey();
 void updateDepartmentFile(int address, Department department);
 void printAllDepartments();
 void insertDepartment();
+void rewriteDepartment(Department d);
 
 //teacher
 void insertTeacher();
@@ -45,3 +47,8 @@ int insertToFile(Teacher teacher, int firstPosition);
 void printAllTeachers();
 void printTeacher();
 void directPrintTeachers();
+int removeTeacher(int key, int first);
+void removeTeacherByKey();
+void rewriteTeacher(Teacher t, int first);
+void updateTeacher(int key, int first);
+void updateTeacherByKey();

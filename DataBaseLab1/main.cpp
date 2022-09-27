@@ -70,7 +70,7 @@ Department createDepartment() {
 
 int getUnusedIndex(const char* file) {
 	FILE* fp;
-	fopen_s(&fp, GARBAGE_FILE, "rb+");
+	fopen_s(&fp, file, "rb+");
 
 	if (!fp) {
 		puts("Can't find garbage file!");
@@ -119,7 +119,7 @@ int getUnusedIndex(const char* file) {
 
 void addGarbage(int address, const char* file) {
 	FILE* fp;
-	fopen_s(&fp, GARBAGE_FILE, "a+");
+	fopen_s(&fp, file, "a+");
 	if (!fp) {
 		printf("Can't find garbage file!");
 		return;
@@ -326,7 +326,10 @@ void removeFromIndex(int key) {
 	delete[] departments;
 }
 
-
+void rewriteDepartment(Department d) {
+	DepartmentIndex index = getDepartmentIndex(d.index);
+	updateDepartmentFile(index.address, d);
+}
 void deleteDepartment(int key) {
 	DepartmentIndex index = getDepartmentIndex(key);
 	if (index.address != -1) {
@@ -404,7 +407,6 @@ int menu() {
 		printf("Command: ");
 		std::cin >> command;
 
-
 		if (strcmp(command, "insert_m") == 0 || strcmp(command, "im") == 0) {
 			insertDepartment();
 		}
@@ -414,8 +416,8 @@ int menu() {
 		else if (strcmp(command, "del_m") == 0 || strcmp(command, "dm") == 0) {
 			deleteDepartmentByKey();
 		}
-		else if (strcmp(command, "del_s") == 0) {
-
+		else if (strcmp(command, "del_s") == 0 || strcmp(command, "ds") == 0) {
+			removeTeacherByKey();
 		}
 		else if (strcmp(command, "print_m") == 0 || strcmp(command, "pm") == 0) {
 			printDepartment();
@@ -435,8 +437,8 @@ int menu() {
 		else if (strcmp(command, "update_m") == 0 || strcmp(command, "um") == 0) {
 			updateDepartmentByKey();
 		}
-		else if (strcmp(command, "update_s") == 0) {
-
+		else if (strcmp(command, "update_s") == 0 || strcmp(command, "us") == 0) {
+			updateTeacherByKey()
 		}
 		else if (strcmp(command, "help") == 0) {
 			std::cout << "HELP:\n\ninsert_m - add new department";
@@ -447,6 +449,7 @@ int menu() {
 		else {
 			puts("Unknown command\n");
 		}
+		std::cout << std::endl;
 	}
 	return 0;
 }
