@@ -5,6 +5,8 @@
 #include "DepartmentIndex.h"
 #include "GarbageList.h"
 #include "Teacher.h"
+
+
 //user interface
 int menu();
 
@@ -52,3 +54,7 @@ void removeTeacherByKey();
 void rewriteTeacher(Teacher t, int first);
 void updateTeacher(int key, int first);
 void updateTeacherByKey();
+void printTeachers(Department d);
+
+//mutual
+void printEverything();

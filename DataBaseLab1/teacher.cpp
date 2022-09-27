@@ -81,6 +81,7 @@ Teacher getTeacher(int key, int firstTeacherAddress) {
 			result = teacher;
 			break;
 		}
+		current = teacher.next;
 	}
 	fclose(fp);
 	return result;
@@ -163,12 +164,17 @@ void printTeacher() {
 
 void printAllTeachers() {
 
+	
+	Department d = findDepartment();
+
+	printTeachers(d);
+}
+
+void printTeachers(Department d) {
 	FILE* fp;
 	fopen_s(&fp, TEACHER_FL_FILE, "rb");
 	if (!fp)
 		return;
-	Department d = findDepartment();
-
 	int current = d.firstTeacherNumber;
 	if (current == -1) {
 		std::cout << "No teachers in the department." << std::endl;
@@ -308,3 +314,4 @@ void rewriteTeacher(Teacher t, int first) {
 	}
 	fclose(fp);
 }
+
